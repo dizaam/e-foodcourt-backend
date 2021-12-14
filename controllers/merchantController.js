@@ -21,6 +21,7 @@ exports.authenticate = async(req, res) => {
 		} else {
 			console.log("Login Berhasil");
 			
+
 			let tokens = createToken(status.rows[0].USERNAME);
 
 			res.cookie('refreshToken', tokens.refreshToken, {httpOnly: true});

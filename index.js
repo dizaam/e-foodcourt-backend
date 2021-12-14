@@ -1,7 +1,10 @@
 const express = require('express');
 const database = require("./services/database");
 const morgan = require("morgan");
+
 const merchantRouter = require("./routes/merchantRouter");
+const customerRouter = require("./routes/customerRouter");
+const productRouter = require("./routes/productRouter");
 
 const app = express();
 
@@ -23,6 +26,8 @@ app.get('/', async(req, res) => {
 });
 
 app.use("/merchant", merchantRouter);
+app.use("/customer", customerRouter);
+app.use("/product", productRouter);
 
 app.listen(6969, () => {
 	console.log("Server running on port 6969");
