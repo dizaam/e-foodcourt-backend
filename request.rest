@@ -1,0 +1,10 @@
+GET http://localhost:6969/admin/dashboard
+
+###
+POST http://localhost:6969/admin/
+content-type: application/json
+
+{
+	"username": "admin",
+	"password": "admin"
+}
