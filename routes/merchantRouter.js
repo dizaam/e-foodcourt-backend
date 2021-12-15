@@ -4,14 +4,12 @@ const merchantController = require("../controllers/merchantController");
 const authorizeToken = require("../middleware/authorizeToken");
 
 // post login 
-router.get('/', async(req, res) => {
+router.get('/login', async(req, res) => {
 	res.render("../views/admin.ejs");
 })
 
-router.post('/', merchantController.authenticate);
+router.post('/login', merchantController.authenticate);
 
-router.get('/dashboard', async(req, res) => {
-
-});
+// router.get('/product', authorizeToken, );
 
 module.exports = router;

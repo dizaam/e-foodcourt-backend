@@ -5,8 +5,8 @@ module.exports = {
     connectString: "localhost/XEPDB1"
   },
 
-  hrPool: {
-    user: "hr",
+  pool: {
+    user: "coffee_1",
     password: "admin",
     connectString: "localhost/XEPDB1",
     poolMin: 10,

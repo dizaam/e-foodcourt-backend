@@ -1,34 +1,63 @@
-const express = require('express');
 const database = require("./services/database");
-const morgan = require("morgan");
+const webServer = require("./services/webServer");
 
-const merchantRouter = require("./routes/merchantRouter");
-const customerRouter = require("./routes/customerRouter");
-const productRouter = require("./routes/productRouter");
+const init = async() => {
+	try {
+		await database.initPool();
+		console.log("Database initialized");
+	} catch(err) {
+		console.log(err);
+		process.exit(1);
+	}
 
-const app = express();
+	try {
+		await webServer.initServer();
+		console.log("Web server initialized")
+	} catch(err) {
+		console.log(err);
+		process.exit(1);
+	}
 
-app.set('view engine', 'ejs');
+};
 
-app.use(morgan('combined'));
-app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-		
-app.get('/', async(req, res) => {
-	const result = await database.dbExecute(
-	`
-		SELECT *
-		FROM CUSTOMER
-	`);
-	
-	console.log(result.rows);
-	res.send(`<h1>WELCOME ${result.rows[0].EMAIL}</h1>`);
+init();
+
+
+const shutdown = async(e) => {
+	let err = e;
+
+  try {
+    await database.closePool();
+  } catch (e) {
+    console.error(e);
+
+    err = err || e;
+  }
+
+  console.log('Exiting process');
+
+  if (err) {
+    process.exit(1); // Non-zero failure code
+  } else {
+    process.exit(0);
+  }
+}
+
+process.once('SIGTERM', () => {
+  console.log('Received SIGTERM');
+
+  shutdown();
 });
 
-app.use("/merchant", merchantRouter);
-app.use("/customer", customerRouter);
-app.use("/product", productRouter);
+process.once('SIGINT', () => {
+  console.log('Received SIGINT');
 
-app.listen(6969, () => {
-	console.log("Server running on port 6969");
+  shutdown();
+});
+
+process.once('uncaughtException', err => {
+  console.log('Uncaught exception');
+  console.error(err);
+
+  shutdown(err);
 });

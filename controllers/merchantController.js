@@ -1,35 +1,47 @@
-const { dbExecute } = require("../services/database");
-const createToken = require("../services/createToken");
+const oracledb = require("oracledb");
+
+const database = require("../services/database");
+const token = require("../services/token");
 
 exports.authenticate = async(req, res) => {
-	let { username, password } = req.body;
-	console.log(req.body);
+	const { username, password } = req.body;
 
 	try {
-		const status = await dbExecute(
-		`
-			SELECT *
-			FROM MERCHANT M
-			WHERE M.username = '${username}' AND M.password = '${password}'
-		`);
+		const dbResponse = await database.execute(
+			`BEGIN
+				:response := AUTHENTICATE_MERCHANT(:username, :password, :id);
+			END;`,{
+				username: username,
+				password: password,
+				id: { dir: oracledb.BIND_INOUT, type: oracledb.NUMBER},
+				response: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER}
+			}
+		);
 
-		// console.log(status.rows.length);
-		if (!status.rows.length) {
+		const status = dbResponse.outBinds;
+
+		if (status.response === 1) {
 			console.log("Login Gagal");
 
-			return res.status(401).json("Gagal");
+			return res.status(403).json({message: "Username/email and password combination doesnt match"});
 		} else {
 			console.log("Login Berhasil");
-			
 
-			let tokens = createToken(status.rows[0].USERNAME);
+			const result = {
+				id: status.id,
+				token: token.createToken(status.id)
+			}
 
-			res.cookie('refreshToken', tokens.refreshToken, {httpOnly: true});
-			res.json(tokens);
+			res.cookie('refreshToken', result.token.refreshToken, {httpOnly: true});
 
-			return res.status(200).json("Succes");
+			return res.status(200).json(result);
 		}
 	}catch (err) {
-		res.status(401).json({error: error.message});
+		res.status(500).json({error: err.message});
+		throw(err);
 	}
+}
+
+exports.getAllProduct = async(req, res) => {
+
 }

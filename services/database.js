@@ -8,14 +8,26 @@ if (process.platform === 'darwin') {
   oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_21_3'});   // note the double backslashes
 } // else you must set the system library search path before starting Node.js
 
-async function dbExecute(statement, binds = [], opts = {}) {
-	let conn;
-	let result = [];
+exports.initPool = async() => {
+	await oracledb.createPool(dbConfig.pool);
+}
 
-	opts.outFormat = oracledb.OUT_FORMAT_OBJECT;
+exports.closePool = async() => {
+	await oracledb.getPool().close(0);
+}
+
+exports.execute = async(statement, binds = [], t_opts = {}) => {
+	let conn;
+	let result;
+
+	opts = {
+		outFormat: oracledb.OUT_FORMAT_OBJECT,
+		autoCommit: true,
+		...t_opts
+	}
 
 	try {
-		conn = await oracledb.getConnection(dbConfig.coffee);
+		conn = await oracledb.getConnection();
 
 		result = await conn.execute(statement, binds, opts);
 
@@ -33,5 +45,3 @@ async function dbExecute(statement, binds = [], opts = {}) {
 		}
 	}
 }
-
-module.exports.dbExecute = dbExecute;
