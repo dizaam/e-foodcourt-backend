@@ -4,27 +4,28 @@ const database = require("../services/database");
 const token = require("../services/token");
 
 exports.register = async(req, res) => {
-	const {email, username, password, phone} = req.body;
+	const {email, fullname, password, phone, gender} = req.body;
 
 	try {
 		const dbResponse = await database.execute(
 			`BEGIN
-				:response := CREATE_NEW_CUSTOMER(:email, :username, :password, :phone);
+				:flag := CREATE_CUSTOMER(:email, :fullname, :password, :phone, :gender);
 			END;`,{
 				email: email,
-				username: username,
+				fullname: fullname,
 				password: password,
 				phone: phone, 
-				response: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER}
+				gender: gender,
+				flag: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER}
 			}
 		);
 
 		const status = dbResponse.outBinds;
 
-		if (status.response === 0) {
+		if (status.flag === 0) {
 			return res.status(200).json("Register succes");
-		} else if (status.response === 1) {
-			return res.status(403).json("Please choose different email/username/phone");
+		} else if (status.flag === 1) {
+			return res.status(403).json("Please choose different email/phone");
 		} else {
 			return res.status(500).json("Server Error");
 		}
@@ -75,3 +76,69 @@ exports.login = async(req, res) => {
 }
 
 
+exports.addToCart = async(req, res) => {
+	const { customer_id, product_id, quantity, note } = req.body;
+
+	try {
+		const dbResponse = await database.execute(
+			`BEGIN
+				:flag := ADD_TO_CART(:customer_id, :product_id, :quantity, :note);
+				UPDATE_CART(:customer_id);
+			END;`,{
+				customer_id: customer_id,
+				product_id: product_id,
+				quantity: quantity,
+				note: note,
+				flag: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER}
+			}
+		);
+
+		const status = dbResponse.outBinds;
+
+		if (status.flag === 1) {
+			console.log("Stock habis");
+
+			return res.status(403).json({message: "Product out of stock"});
+		} else {
+			console.log("Succes add to cart");
+
+			return res.status(200).json({message: "Product added to your cart"});
+		}
+	}catch (err) {
+		res.status(500).json({error: err.message});
+		throw(err);
+	}
+
+}
+
+exports.checkout = async(req, res) => {
+	const { customer_id, table_no, payment_method } = req.body;
+
+	try {
+		const dbResponse = await database.execute(
+			`BEGIN
+				:flag := CHECKOUT(:customer_id, :table_no, :payment_method);
+			END;`,{
+				customer_id: customer_id,
+				table_no: table_no,
+				payment_method: payment_method,
+				flag: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER}
+			}
+		);
+
+		const status = dbResponse.outBinds;
+
+		if (status.flag === 1) {
+			console.log("You can only orders at least 1 item");
+
+			return res.status(403).json({message: "Failed, Ordering 0 product"});
+		} else {
+			console.log("Order Success");
+
+			return res.status(200).json({message: "Succesfully ordered"});
+		}
+	}catch (err) {
+		res.status(500).json({error: err.message});
+		throw(err);
+	}
+}

@@ -8,8 +8,15 @@ router.get('/login', async(req, res) => {
 	res.render("../views/admin.ejs");
 })
 
-router.post('/login', merchantController.authenticate);
+router.get("/all", merchantController.readAll);
 
-// router.get('/product', authorizeToken, );
+router.post('/login', merchantController.login);
+
+router.post("/register", merchantController.register);
+
+router.put("/update/:id", merchantController.update)
+
+router.delete("/:id", merchantController.delete);
+
 
 module.exports = router;

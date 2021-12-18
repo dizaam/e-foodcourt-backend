@@ -1,6 +1,10 @@
 const express = require("express");
 const morgan = require("morgan");
 
+const database = require("./database");
+
+const adminRouter = require("../routes/adminRouter");
+const paymentRouter = require("../routes/paymentRouter");
 const merchantRouter = require("../routes/merchantRouter");
 const customerRouter = require("../routes/customerRouter");
 const productRouter = require("../routes/productRouter");
@@ -20,7 +24,7 @@ exports.initServer = async() => {
 		// const password = "qwerty";
 		// const phone = "082234234";
 		
-		const result = await database.dbExecute(
+		const result = await database.execute(
 			`SELECT *
 			FROM CUSTOMER
 			`
@@ -45,6 +49,8 @@ exports.initServer = async() => {
 		// res.send("hai");
 	});
 	
+	app.use("/admin", adminRouter);
+	app.use("/payment", paymentRouter);
 	app.use("/merchant", merchantRouter);
 	app.use("/customer", customerRouter);
 	app.use("/product", productRouter);

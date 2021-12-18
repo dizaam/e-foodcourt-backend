@@ -20,9 +20,12 @@ exports.execute = async(statement, binds = [], t_opts = {}) => {
 	let conn;
 	let result;
 
-	opts = {
+	oracledb.fetchAsString = [ oracledb.CLOB ];
+
+	const opts = {
 		outFormat: oracledb.OUT_FORMAT_OBJECT,
 		autoCommit: true,
+
 		...t_opts
 	}
 
