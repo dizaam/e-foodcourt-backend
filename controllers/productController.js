@@ -1,10 +1,10 @@
 const oracledb = require("oracledb");
 const database = require("../services/database");
 
-exports.readAllAvailableProduct = async(req, res) => {
+exports.readAllAvailable = async(req, res) => {
 	try {
 		const dbResponse = await database.execute(
-			`SELECT PRODUCT.ID, TITLE, DESCRIPTION, IMAGE_URL, PRICE, STOCK, MERCHANT_ID, CATEGORY_ID
+			`SELECT PRODUCT.ID, TITLE, DESCRIPTION, IMAGE_URL, PRICE, STOCK, MERCHANT_ID
 			FROM PRODUCT 
 			INNER JOIN MERCHANT ON MERCHANT_ID = MERCHANT.ID
 			WHERE STATUS = 1
@@ -20,7 +20,28 @@ exports.readAllAvailableProduct = async(req, res) => {
 	}
 }
 
-exports.readMerchantProduct = async(req, res) => {
+exports.readCategory = async(req, res) => {
+	const { category_id } = req.body;
+	try {
+		const dbResponse = await database.execute(
+			`SELECT DISTINCT ID, TITLE, TO_CHAR(DESCRIPTION), IMAGE_URL, PRICE, STOCK, MERCHANT_ID
+			FROM PRODUCT 
+			INNER JOIN PRODUCT_CATEGORY ON PRODUCT_ID = PRODUCT.ID
+			WHERE CATEGORY_ID IN (${[...category_id]})
+			`
+		);
+
+		console.log(dbResponse.rows);
+
+		res.status(200).json(dbResponse.rows);
+
+	} catch(err) {
+		res.status(500).json({message: err.message});
+	}
+
+}
+
+exports.readMerchant = async(req, res) => {
 	const id = req.params.id;
 
 	try {
@@ -42,7 +63,7 @@ exports.readMerchantProduct = async(req, res) => {
 	}
 }
 
-exports.readProduct = async(req, res) => {
+exports.read = async(req, res) => {
 	const id = req.params.id;
 
 	try {
@@ -64,21 +85,24 @@ exports.readProduct = async(req, res) => {
 	}
 }
 
-exports.createProduct = async(req, res) => {
+exports.create = async(req, res) => {
 	const { title, description, price, stock, image_url, category_id, merchant_id} = req.body;
 	console.log(req.body);
 
 	try {
 		const dbResponse = await database.execute(
 			`BEGIN
-				:FLAG := CREATE_PRODUCT(:TITLE, :DESCRIPTION, :PRICE, :STOCK, :IMAGE_URL, :CATEGORY_ID, :MERCHANT_ID);
+				:FLAG := CREATE_PRODUCT(:PRODUCT_ID, :TITLE, :DESCRIPTION, :PRICE, :STOCK, :IMAGE_URL, :MERCHANT_ID);
+
+				CATEGORY_PKG.ADD_PRODUCT_CATEGORY(:PRODUCT_ID, :CATEGORY_ID);
 			END;`, {
+				product_id: { dir:oracledb.BIND_OUT, type: oracledb.NUMBER},
 				title: title,
 				description: description,
 				price: price,
 				stock: stock,
 				image_url: image_url,
-				category_id: category_id,
+				category_id: { dir: oracledb.BIND_IN, type: oracledb.NUMBER, val: [...category_id]},
 				merchant_id: merchant_id,
 				flag: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER}
 			}
@@ -95,14 +119,14 @@ exports.createProduct = async(req, res) => {
 	}
 }
 
-exports.updateProduct = async(req, res) => {
+exports.update = async(req, res) => {
 	const id = req.params.id;
 	const { title, description, price, stock, image_url, category_id } = req.body;
 
 	try {
 		const dbResponse = await database.execute(
 			`BEGIN
-				UPDATE_PRODUCT(:ID, :TITLE, :DESCRIPTION, :PRICE, :STOCK, :IMAGE_URL, :CATEGORY_ID);
+				:FLAG := UPDATE_PRODUCT(:ID, :TITLE, :DESCRIPTION, :PRICE, :STOCK, :IMAGE_URL);
 			END;`, {
 				id: id,
 				title: title,
@@ -110,26 +134,22 @@ exports.updateProduct = async(req, res) => {
 				price: price,
 				stock: stock,
 				image_url: image_url,
-				category_id: category_id
+				flag: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
 			}
 		);
 
-		// console.log(dbResponse);
-		// if (dbResponse.outBinds.flag === 1) {
-		// 	res.status(400).json({message: "you cannot add same product"})
-		// } else if (dbResponse.outBinds.flag === 0) {
-		// 	res.status(200).json({message: "product successfully added"})
-		// }
-
-		res.status(200).json({message: "product successfully updated"});
-
+		if (dbResponse.outBinds.flag === 1) {
+			res.status(400).json({message: "you cannot have duplicate product"})
+		} else if (dbResponse.outBinds.flag === 0) {
+			res.status(200).json({message: "product successfully updated"})
+		}
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}
 
 }
 
-exports.deleteProduct = async(req, res) => {
+exports.delete = async(req, res) => {
 	const id = req.params.id;
 
 	try {

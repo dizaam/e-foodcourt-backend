@@ -2,16 +2,19 @@ const router = require("express").Router();
 
 const productController = require("../controllers/productController");
 
-router.get("/all", productController.readAllAvailableProduct);
+router.get("/all", productController.readAllAvailable);
 
-router.get("/merchant/:id", productController.readMerchantProduct);
+router.get("/category", productController.readCategory);
 
-router.get("/:id", productController.readProduct);
+router.get("/merchant/:id", productController.readMerchant);
 
-router.post("/create", productController.createProduct);
+router.get("/:id", productController.read);
 
-router.put("/update/:id", productController.updateProduct);
+router.post("/create", productController.create);
 
-router.delete("/delete/:id", productController.deleteProduct);
+router.put("/update/:id", productController.update);
+
+router.delete("/delete/:id", productController.delete);
+
 
 module.exports = router;

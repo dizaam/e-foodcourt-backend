@@ -2,17 +2,13 @@ const oracledb = require("oracledb");
 
 const database = require("../services/database");
 
-exports.read = async(req, res) => {
-	const id = req.params.id;
+exports.readAll = async(req, res) => {
 
 	try {
 		const dbResponse = await database.execute(
 			`SELECT * 
-			FROM ORDERS_ITEM
-			WHERE ORDERS_ID = :ID
-			`, {
-				id: id
-			}
+			FROM INVOICE
+			`
 		);
 
 		console.log(dbResponse.rows);
@@ -22,6 +18,7 @@ exports.read = async(req, res) => {
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}
+
 }
 
 exports.readCustomer = async(req, res) => {
@@ -30,7 +27,7 @@ exports.readCustomer = async(req, res) => {
 	try {
 		const dbResponse = await database.execute(
 			`SELECT *
-			FROM ORDERS
+			FROM INVOICE
 			WHERE CUSTOMER_ID = :ID
 			`, {
 				id: id
@@ -40,29 +37,9 @@ exports.readCustomer = async(req, res) => {
 		console.log(dbResponse.rows);
 
 		res.status(200).json(dbResponse.rows);
-	} catch(err) {
-		res.status(500).json({message: err.message});
-	}
-}
-
-exports.readMerchant = async(req, res) => {
-	const id = req.params.id;
-
-	try {
-		const dbResponse = await database.execute(
-			`SELECT *
-			FROM ORDERS
-			WHERE MERCHANT_ID = :ID
-			`, {
-				id: id
-			}
-		);
-
-		console.log(dbResponse.rows);
-
-		res.status(200).json(dbResponse.rows);
 
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}
+
 }

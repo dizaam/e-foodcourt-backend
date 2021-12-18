@@ -42,16 +42,28 @@ CREATE TABLE product (
     image_url   VARCHAR2(255 CHAR),
     price       INTEGER,
     stock       INTEGER,
-    merchant_id INTEGER NOT NULL,
-    category_id INTEGER
+    merchant_id INTEGER NOT NULL
 );
 
 ALTER TABLE product 
     ADD CONSTRAINT product_pk PRIMARY KEY ( id )
     ADD CONSTRAINT product_merchant_fk FOREIGN KEY ( merchant_id )
-        REFERENCES merchant ( id ) ON DELETE CASCADE
-    ADD CONSTRAINT product_category_fk FOREIGN KEY ( category_id )
-        REFERENCES category ( id ) ON DELETE SET NULL;
+        REFERENCES merchant ( id ) ON DELETE CASCADE;
+
+CREATE SEQUENCE PRODUCT_SEQ START WITH 1;
+        
+-- product category m to m relation
+CREATE TABLE PRODUCT_CATEGORY (
+    PRODUCT_ID INTEGER,
+    CATEGORY_ID INTEGER
+);
+
+ALTER TABLE PRODUCT_CATEGORY
+    ADD CONSTRAINT PRODUCT_ID_FK FOREIGN KEY (PRODUCT_ID)
+        REFERENCES PRODUCT (ID) ON DELETE CASCADE
+    ADD CONSTRAINT CATEGORY_ID_FK FOREIGN KEY (CATEGORY_ID)
+        REFERENCES CATEGORY (ID) ON DELETE CASCADE;
+
         
 --customers
 CREATE TABLE customer (
