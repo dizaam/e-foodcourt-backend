@@ -115,7 +115,8 @@ ALTER TABLE cart
 CREATE TABLE cart_item (
     cart_id    INTEGER NOT NULL,
     product_id INTEGER NOT NULL,
-    quantity    INTEGER
+    quantity    INTEGER,
+    note CLOB
 );
 
 ALTER TABLE cart_item 
