@@ -21,6 +21,29 @@ exports.readAll = async(req, res) => {
 
 }
 
+exports.readProduct = async(req, res) => {
+	const id = req.params.id;
+
+	try {
+		const dbResponse = await database.execute(
+			`SELECT * 
+			FROM PRODUCT_CATEGORY
+			WHERE PRODUCT_ID = :ID
+			`, {
+				ID: id
+			}
+		);
+
+		console.log(dbResponse.rows);
+
+		res.status(200).json(dbResponse.rows);
+
+	} catch(err) {
+		res.status(500).json({message: err.message});
+	}
+
+}
+
 exports.create = async(req, res) => {
 	const { name } = req.body;
 

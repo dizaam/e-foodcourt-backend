@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const morgan = require("morgan");
 
 const database = require("./database");
@@ -15,6 +16,7 @@ const invoiceRouter = require("../routes/invoiceRouter");
 exports.initServer = async() => {
 	const app = express();
 	
+	app.use(cors());
 	app.use(morgan('combined'));
 	app.use(express.json());
 	app.use(express.urlencoded({extended: true}));

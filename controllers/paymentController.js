@@ -38,15 +38,16 @@ exports.readAvailable = async(req, res) => {
 }
 
 exports.create = async(req, res) => {
-	const { method, number } = req.body;
+	const { method, number, status_p} = req.body;
 
 	try {
 		const dbResponse = await database.execute(
 			`BEGIN
-				:flag := CREATE_PAYMENT(:method, :number);
+				:flag := CREATE_PAYMENT(:method, :number, :status_p);
 			END;`,{
 				method: method,
 				number: number,
+				status_p: status_p,
 				flag: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER}
 			}
 		);

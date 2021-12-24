@@ -8,7 +8,10 @@ router.get('/login', async(req, res) => {
 	res.render("../views/admin.ejs");
 })
 
+
 router.get("/all", merchantController.readAll);
+
+router.get("/:id", merchantController.read);
 
 router.post('/login', merchantController.login);
 

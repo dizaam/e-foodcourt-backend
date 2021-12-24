@@ -9,7 +9,7 @@ if (process.platform === 'darwin') {
 } // else you must set the system library search path before starting Node.js
 
 exports.initPool = async() => {
-	await oracledb.createPool(dbConfig.pool);
+	await oracledb.createPool(dbConfig.cloudPool);
 }
 
 exports.closePool = async() => {

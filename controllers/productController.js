@@ -67,6 +67,19 @@ exports.read = async(req, res) => {
 	const id = req.params.id;
 
 	try {
+		const getCategory = await database.execute(
+			`SELECT * 
+			FROM PRODUCT_CATEGORY
+			WHERE PRODUCT_ID = :ID
+			`, {
+				ID: id
+			}
+		)
+
+		const categories = getCategory.rows.map(category => {
+			return category.CATEGORY_ID;
+		})
+
 		const dbResponse = await database.execute(
 			`SELECT *
 			FROM PRODUCT
@@ -76,9 +89,16 @@ exports.read = async(req, res) => {
 			}
 		);
 
-		console.log(dbResponse.rows);
+		const result = dbResponse.rows.map(product => {
+			return {
+				...product,
+				CATEGORY_ID: [...categories]
+			}
+		})
 
-		res.status(200).json(dbResponse.rows);
+		console.log(result);
+
+		res.status(200).json(result);
 
 	} catch(err) {
 		res.status(500).json({message: err.message});
@@ -127,6 +147,8 @@ exports.update = async(req, res) => {
 		const dbResponse = await database.execute(
 			`BEGIN
 				:FLAG := UPDATE_PRODUCT(:ID, :TITLE, :DESCRIPTION, :PRICE, :STOCK, :IMAGE_URL);
+
+				CATEGORY_PKG.UPDATE_PRODUCT_CATEGORY(:ID, :CATEGORY_ID);
 			END;`, {
 				id: id,
 				title: title,
@@ -134,6 +156,7 @@ exports.update = async(req, res) => {
 				price: price,
 				stock: stock,
 				image_url: image_url,
+				CATEGORY_ID: category_id,
 				flag: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
 			}
 		);

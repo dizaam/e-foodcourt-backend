@@ -6,4 +6,6 @@ router.get("/all", categoryController.readAll);
 
 router.post("/create", categoryController.create);
 
+router.get("/product/:id", categoryController.readProduct)
+
 module.exports = router;
