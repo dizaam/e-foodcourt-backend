@@ -50,9 +50,10 @@ exports.create = async(req, res) => {
 	try {
 		const dbResponse = await database.execute(
 			`BEGIN
-				:flag := CREATE_CATEGORY(:NAME);
+				:flag := CREATE_CATEGORY(:NAME, :ID);
 			END;`, {
 				name: name,
+				id: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER},
 				flag: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER}
 			}
 		);
@@ -60,7 +61,10 @@ exports.create = async(req, res) => {
 		if (dbResponse.outBinds.flag === 1) {
 			res.status(400).json({message: "you cannot add same category"})
 		} else if (dbResponse.outBinds.flag === 0) {
-			res.status(200).json({message: "category successfully added"})
+			res.status(200).json({
+				new_id: dbResponse.outBinds.id,
+				message: "category successfully added"
+			})
 		}
 
 	} catch(err) {
