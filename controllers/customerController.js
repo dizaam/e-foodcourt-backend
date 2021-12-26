@@ -3,6 +3,29 @@ const oracledb = require("oracledb");
 const database = require("../services/database");
 const token = require("../services/token");
 
+exports.read = async(req, res) => {
+	const id = req.params.id;
+
+	try {
+		const dbResponse = await database.execute(
+			`SELECT *
+			FROM CUSTOMER
+			WHERE ID = :ID
+			`, {
+				id: id
+			}
+		);
+
+		console.log(dbResponse.rows);
+
+		res.status(200).json(dbResponse.rows);
+
+	} catch(err) {
+		res.status(500).json({message: err.message});
+	}
+
+}
+
 exports.register = async(req, res) => {
 	const {email, fullname, password, phone, gender} = req.body;
 
