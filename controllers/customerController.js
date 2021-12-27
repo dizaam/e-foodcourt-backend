@@ -8,22 +8,36 @@ exports.read = async(req, res) => {
 
 	try {
 		const dbResponse = await database.execute(
-			`SELECT *
-			FROM CUSTOMER
-			WHERE ID = :ID
-			`, {
+			`BEGIN
+				READ_A_CUSTOMER(:id);
+			END;`, {
 				id: id
 			}
 		);
 
-		console.log(dbResponse.rows);
+		console.log(dbResponse.implicitResults[0]);
 
-		res.status(200).json(dbResponse.rows);
-
+		res.status(200).json(dbResponse.implicitResults[0]);
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}
 
+}
+
+exports.readAll = async(req, res) => {
+	try {
+		const dbResponse = await database.execute(
+			`BEGIN
+				READ_ALL_CUSTOMER();
+			END;`
+		);
+
+		console.log(dbResponse.implicitResults[0]);
+
+		res.status(200).json(dbResponse.implicitResults[0]);
+	} catch(err) {
+		res.status(500).json({message: err.message});
+	}
 }
 
 exports.register = async(req, res) => {
@@ -59,14 +73,14 @@ exports.register = async(req, res) => {
 }
 
 exports.login = async(req, res) => {
-	const { unamemail, password } = req.body;
+	const { email, password } = req.body;
 
 	try {
 		const dbResponse = await database.execute(
 			`BEGIN
-				:response := AUTHENTICATE_CUSTOMER(:unamemail, :password, :id);
+				:response := AUTHENTICATE_CUSTOMER(:email, :password, :id);
 			END;`,{
-				unamemail: unamemail,
+				email: email,
 				password: password,
 				id: { dir: oracledb.BIND_INOUT, type: oracledb.NUMBER},
 				response: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER}
@@ -78,7 +92,7 @@ exports.login = async(req, res) => {
 		if (status.response === 1) {
 			console.log("Login Gagal");
 
-			return res.status(403).json({message: "Username/email and password combination doesnt match"});
+			return res.status(403).json({message: "Username/email and password combination doesnt match or account is being used"});
 		} else {
 			console.log("Login Berhasil");
 
@@ -98,6 +112,85 @@ exports.login = async(req, res) => {
 	
 }
 
+exports.logout = async(req, res) => {
+	const customer_id = req.params.id;
+
+	try {
+		const dbResponse = await database.execute(
+			`BEGIN
+				LOGOUT_CUSTOMER(:customer_id);
+			END;`, {
+				customer_id: customer_id
+			}
+		);
+
+		console.log("LOGOUT SUCCESS");
+		res.status(200).json({message: "LOGOUT SUCCESS"});
+	} catch(err) {
+		res.status(500).json({message: err.message});
+	}
+}
+
+exports.delete = async(req, res) => {
+	const id = req.params.id;
+
+	try {
+		const dbResponse = await database.execute(
+			`BEGIN
+				:flag := DELETE_A_CUSTOMER(:id);
+			END;`, {
+				id: id,
+				flag: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
+			}
+		);
+
+		const result = dbResponse.outBinds.flag;
+		
+		console.log(result);
+
+		if (result) {
+			return res.status(200).json("Customer deleted");
+		} else {
+			return res.status(400).json("Customer not found");
+		}
+	} catch(err) {
+		return res.status(500).json({error: err.message})
+	}
+}
+
+exports.update = async(req, res) => {
+	const { customer_id, full_name, email, password, phone, gender } = req.body;
+
+	try {
+		const dbResponse = await database.execute(
+			`BEGIN
+				:flag := UPDATE_CUSTOMER(:customer_id, :full_name, :email, :password, :phone, :gender);
+			END;`,{
+				customer_id: customer_id,
+				full_name: full_name,
+				email: email,
+				password: password,
+				phone: phone, 
+				gender: gender,
+				flag: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER}
+			}
+		);
+
+		const status = dbResponse.outBinds;
+
+		if (status.flag === 0) {
+			return res.status(200).json("Customer updated");
+		} else if (status.flag === 1) {
+			return res.status(403).json("Please choose different email or phone");
+		} else {
+			throw(error);
+		}
+	} catch(err) {
+		return res.status(500).json({error: err.message})
+	}
+
+
+}
 
 exports.addToCart = async(req, res) => {
 	const { customer_id, product_id, quantity, note } = req.body;
