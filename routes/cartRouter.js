@@ -5,6 +5,6 @@ router.get("/:id", cartController.read);
 
 router.get("/:id/detail", cartController.readDetail);
 
-router.put("/update")
+router.put("/update", cartController.update);
 
 module.exports = router;
