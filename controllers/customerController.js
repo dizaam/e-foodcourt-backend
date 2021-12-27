@@ -226,6 +226,7 @@ exports.addToCart = async(req, res) => {
 
 }
 
+
 exports.checkout = async(req, res) => {
 	const { customer_id, table_no, payment_method } = req.body;
 

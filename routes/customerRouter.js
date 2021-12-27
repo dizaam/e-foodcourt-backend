@@ -16,7 +16,7 @@ router.post("/login", customerController.login);
 
 router.put("/logout/:id", customerController.logout);
 
-router.post("/cart", customerController.addToCart);
+router.post("/addtocart", customerController.addToCart);
 
 router.post("/checkout", customerController.checkout);
 
