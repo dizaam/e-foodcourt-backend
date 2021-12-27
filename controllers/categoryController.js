@@ -6,9 +6,9 @@ exports.readAll = async(req, res) => {
 
 	try {
 		const dbResponse = await database.execute(
-			`SELECT * 
-			FROM CATEGORY 
-			`
+			`BEGIN
+				READ_ALL_CATEGORY();
+			END;`
 		);
 
 		console.log(dbResponse.rows);
@@ -26,10 +26,9 @@ exports.readProduct = async(req, res) => {
 
 	try {
 		const dbResponse = await database.execute(
-			`SELECT * 
-			FROM PRODUCT_CATEGORY
-			WHERE PRODUCT_ID = :ID
-			`, {
+			`BEGIN
+				READ_CATEGORY_BYPRODUCT(:ID);
+			END;`, {
 				ID: id
 			}
 		);
