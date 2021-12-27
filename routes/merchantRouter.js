@@ -11,6 +11,8 @@ router.get('/login', async(req, res) => {
 
 router.get("/all", merchantController.readAll);
 
+router.get("/available", merchantController.readAvailable);
+
 router.get("/:id", merchantController.read);
 
 router.post('/login', merchantController.login);

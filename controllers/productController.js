@@ -42,21 +42,20 @@ exports.readByCategory = async(req, res) => {
 	const { category_id } = req.body;
 	try {
 		const dbResponse = await database.execute(
-			`SELECT DISTINCT ID, TITLE, TO_CHAR(DESCRIPTION), IMAGE_URL, PRICE, STOCK, MERCHANT_ID
-			FROM PRODUCT 
-			INNER JOIN PRODUCT_CATEGORY ON PRODUCT_ID = PRODUCT.ID
-			WHERE CATEGORY_ID IN (${[...category_id]})
-			`
+			`BEGIN
+				READ_PRODUCT_BYCATEGORY(:category_id);
+			END;`, {
+				category_id: { dir: oracledb.BIND_IN, type: "ARRAY_OF_INTEGER", val: [...category_id] }
+			}
 		);
+		const result = dbResponse.implicitResults[0];
 
-		console.log(dbResponse.rows);
+		console.log(result);
 
-		res.status(200).json(dbResponse.rows);
-
+		res.status(200).json(result);
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}
-
 }
 
 exports.readMerchant = async(req, res) => {

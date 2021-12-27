@@ -41,6 +41,25 @@ exports.readAll = async(req, res) => {
 	}
 }
 
+exports.readAvailable = async(req, res) => {
+	try {
+		const dbResponse = await database.execute(
+			`BEGIN
+				READ_AVAILABLE_MERCHANT();
+			END;`
+		);
+
+		console.log(dbResponse.implicitResults[0]);
+
+		res.status(200).json(dbResponse.implicitResults[0]);
+
+	} catch(err) {
+		res.status(500).json({message: err.message});
+	}
+}
+
+
+
 exports.login = async(req, res) => {
 	const { email, password } = req.body;
 
@@ -97,6 +116,7 @@ exports.logout = async(req, res) => {
 		res.status(500).json({message: err.message});
 	}
 }
+
 
 
 
