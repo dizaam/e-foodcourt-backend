@@ -8,17 +8,16 @@ exports.read = async(req, res) => {
 
 	try {
 		const dbResponse = await database.execute(
-			`SELECT *
-			FROM MERCHANT
-			WHERE ID = :ID
-			`, {
+			`BEGIN
+				READ_A_MERCHANT(:id);
+			END;`, {
 				id: id
 			}
 		);
 
-		console.log(dbResponse.rows);
+		console.log(dbResponse.implicitResults[0]);
 
-		res.status(200).json(dbResponse.rows);
+		res.status(200).json(dbResponse.implicitResults[0]);
 
 	} catch(err) {
 		res.status(500).json({message: err.message});
@@ -28,14 +27,14 @@ exports.read = async(req, res) => {
 exports.readAll = async(req, res) => {
 	try {
 		const dbResponse = await database.execute(
-			`SELECT *
-			FROM MERCHANT
-			`
+			`BEGIN
+				READ_ALL_MERCHANT();
+			END;`
 		);
 
-		console.log(dbResponse.rows);
+		console.log(dbResponse.implicitResults[0]);
 
-		res.status(200).json(dbResponse.rows);
+		res.status(200).json(dbResponse.implicitResults[0]);
 
 	} catch(err) {
 		res.status(500).json({message: err.message});
@@ -156,15 +155,22 @@ exports.delete = async(req, res) => {
 
 	try {
 		const dbResponse = await database.execute(
-			`DELETE FROM MERCHANT
-			WHERE ID = :ID
-			`, {
-				id: id
+			`BEGIN
+				:flag := DELETE_A_MERCHANT(:id);
+			END;`, {
+				id: id,
+				flag: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
 			}
 		);
-			
-		return res.status(200).json("Merchant deleted");
 
+		const result = dbResponse.outBinds.flag;
+		console.log(result);
+
+		if (result) {
+			return res.status(200).json("Merchant deleted");
+		} else {
+			return res.status(400).json("Merchant not found");
+		}
 	} catch(err) {
 		return res.status(500).json({error: err.message})
 	}

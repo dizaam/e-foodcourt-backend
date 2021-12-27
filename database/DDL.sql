@@ -199,4 +199,5 @@ ALTER TABLE orders_item
     ADD CONSTRAINT orders_item_product_fk FOREIGN KEY ( product_id )
         REFERENCES product ( id ) ON DELETE SET NULL;
         
+CREATE TYPE ARRAY_OF_INTEGER IS TABLE OF INTEGER;
 

@@ -1,26 +1,44 @@
 const oracledb = require("oracledb");
 const database = require("../services/database");
 
-exports.readAllAvailable = async(req, res) => {
+exports.readAll = async(req, res) => {
 	try {
 		const dbResponse = await database.execute(
-			`SELECT PRODUCT.ID, TITLE, DESCRIPTION, IMAGE_URL, PRICE, STOCK, MERCHANT_ID
-			FROM PRODUCT 
-			INNER JOIN MERCHANT ON MERCHANT_ID = MERCHANT.ID
-			WHERE STATUS = 1
-			`
+			`BEGIN
+				READ_ALL_PRODUCT();
+			END;`
 		);
 
-		console.log(dbResponse.rows);
+		const result = dbResponse.implicitResults[0];
 
-		res.status(200).json(dbResponse.rows);
+		console.log(result);
 
+		res.status(200).json(result);
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}
 }
 
-exports.readCategory = async(req, res) => {
+
+exports.readAllAvailable = async(req, res) => {
+	try {
+		const dbResponse = await database.execute(
+			`BEGIN
+				READ_AVAILABLE_PRODUCT();
+			END;`
+		);
+
+		const result = dbResponse.implicitResults[0];
+
+		console.log(result);
+
+		res.status(200).json(result);
+	} catch(err) {
+		res.status(500).json({message: err.message});
+	}
+}
+
+exports.readByCategory = async(req, res) => {
 	const { category_id } = req.body;
 	try {
 		const dbResponse = await database.execute(
