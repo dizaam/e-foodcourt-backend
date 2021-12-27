@@ -24,7 +24,11 @@ BEGIN
     UPDATE_PRODUCT(21, 'Seblak Terserah', 'Terserah kamu gimana', 20000, 100, 'google.com', 2);
 END;
 
+
+
+---
 -- PL SQL PROCEDURE/FUNCTION DECLARATION
+---
 CREATE OR REPLACE PROCEDURE READ_ALL_PRODUCT IS
     L_CURSOR SYS_REFCURSOR;
 BEGIN
@@ -114,7 +118,8 @@ BEGIN
             DESCRIPTION = L_DESCRIPTION,
             PRICE = L_PRICE,
             STOCK = L_STOCK,
-            IMAGE_URL = L_IMAGE_URL
+            IMAGE_URL = L_IMAGE_URL,
+            UPDATED_AT = SYSDATE
         WHERE ID = L_ID;
         RETURN 0;
 END;

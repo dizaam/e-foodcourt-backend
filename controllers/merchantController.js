@@ -39,8 +39,6 @@ exports.readAll = async(req, res) => {
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}
-
-
 }
 
 exports.login = async(req, res) => {
@@ -63,7 +61,7 @@ exports.login = async(req, res) => {
 		if (status.flag === 1) {
 			console.log("Login Gagal");
 
-			return res.status(403).json({message: "Username/email and password combination doesnt match"});
+			return res.status(403).json({message: "Username/email and password combination doesnt match or account is being used"});
 		} else {
 			console.log("Login Berhasil");
 
@@ -78,9 +76,29 @@ exports.login = async(req, res) => {
 		}
 	}catch (err) {
 		res.status(500).json({error: err.message});
-		throw(err);
 	}
 }
+
+exports.logout = async(req, res) => {
+	const merchant_id = req.params.id;
+
+	try {
+		await database.execute(
+			`BEGIN
+				LOGOUT_MERCHANT(:merchant_id);
+			END;`, {
+				merchant_id: merchant_id
+			}
+		);
+
+		console.log("LOGOUT SUCCESS");
+		res.status(200).json({message: "LOGOUT SUCCESS"});
+	} catch(err) {
+		res.status(500).json({message: err.message});
+	}
+}
+
+
 
 exports.register = async(req, res) => {
 	const {name, email, password, phone, website} = req.body;
@@ -115,8 +133,7 @@ exports.register = async(req, res) => {
 }
 
 exports.update = async(req, res) => {
-	const merchant_id = req.params.id;
-	const { name, email, password, m_status, phone, website } = req.body;
+	const { merchant_id, name, email, password, m_status, phone, website } = req.body;
 
 	try {
 		const dbResponse = await database.execute(

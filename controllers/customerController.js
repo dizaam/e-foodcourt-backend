@@ -199,7 +199,6 @@ exports.addToCart = async(req, res) => {
 		const dbResponse = await database.execute(
 			`BEGIN
 				:flag := ADD_TO_CART(:customer_id, :product_id, :quantity, :note);
-				UPDATE_CART(:customer_id);
 			END;`,{
 				customer_id: customer_id,
 				product_id: product_id,

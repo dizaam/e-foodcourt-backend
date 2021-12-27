@@ -15,9 +15,11 @@ router.get("/:id", merchantController.read);
 
 router.post('/login', merchantController.login);
 
+router.put('/logout/:id', merchantController.logout);
+
 router.post("/register", merchantController.register);
 
-router.put("/update/:id", merchantController.update)
+router.put("/update", merchantController.update)
 
 router.delete("/:id", merchantController.delete);
 

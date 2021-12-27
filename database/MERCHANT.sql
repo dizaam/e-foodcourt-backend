@@ -61,8 +61,8 @@ BEGIN
     RETURN 1;
     EXCEPTION
         WHEN NO_DATA_FOUND THEN
-        INSERT INTO MERCHANT (id, name, email, password, status, phone, website)
-        VALUES(NULL, L_NAME, L_EMAIL, L_PASSWORD, 0, L_PHONE, L_WEBSITE);
+        INSERT INTO MERCHANT (id, name, email, password, status, phone, website, is_login, created_at, updated_at)
+        VALUES(NULL, L_NAME, L_EMAIL, L_PASSWORD, 0, L_PHONE, L_WEBSITE, 0, SYSDATE, SYSDATE);
         RETURN 0;
 END;
 /
@@ -84,7 +84,8 @@ BEGIN
                 PASSWORD = L_PASSWORD,
                 STATUS = L_STATUS,
                 PHONE = L_PHONE,
-                WEBSITE = L_WEBSITE
+                WEBSITE = L_WEBSITE,
+                UPDATED_AT = SYSDATE
             WHERE ID = L_MERCHANT_ID;
             RETURN 0;
 END;
@@ -96,13 +97,26 @@ L_MERCHANT MERCHANT%ROWTYPE;
 BEGIN
     SELECT * INTO L_MERCHANT
     FROM MERCHANT
-    WHERE EMAIL = L_EMAIL AND PASSWORD = L_PASSWORD;
+    WHERE LOWER(EMAIL) = LOWER(L_EMAIL) AND PASSWORD = L_PASSWORD AND IS_LOGIN = 0;
 
     L_ID := L_MERCHANT.ID;
+    
+    UPDATE MERCHANT SET
+        IS_LOGIN = 1
+    WHERE ID = L_ID;
 
     RETURN 0;
     EXCEPTION 
         WHEN NO_DATA_FOUND THEN
             RETURN 1;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE LOGOUT_MERCHANT(L_MERCHANT_ID IN INTEGER)
+IS
+BEGIN
+    UPDATE MERCHANT SET
+        IS_LOGIN = 0
+    WHERE ID = L_MERCHANT_ID;
 END;
 /

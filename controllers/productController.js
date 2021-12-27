@@ -158,8 +158,7 @@ exports.create = async(req, res) => {
 }
 
 exports.update = async(req, res) => {
-	const id = req.params.id;
-	const { title, description, price, stock, image_url, category_id } = req.body;
+	const { id, title, description, price, stock, image_url, category_id } = req.body;
 
 	try {
 		const dbResponse = await database.execute(
@@ -174,7 +173,7 @@ exports.update = async(req, res) => {
 				price: price,
 				stock: stock,
 				image_url: image_url,
-				CATEGORY_ID: category_id,
+				CATEGORY_ID: { dir: oracledb.BIND_IN, type: oracledb.NUMBER, val: [...category_id]},
 				flag: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
 			}
 		);
