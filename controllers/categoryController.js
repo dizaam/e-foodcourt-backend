@@ -10,11 +10,11 @@ exports.readAll = async(req, res) => {
 				READ_ALL_CATEGORY();
 			END;`
 		);
+		const result = dbResponse.implicitResults[0];
 
-		console.log(dbResponse.rows);
+		console.log(result);
 
-		res.status(200).json(dbResponse.rows);
-
+		res.status(200).json(result);
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}
@@ -32,11 +32,11 @@ exports.readProduct = async(req, res) => {
 				ID: id
 			}
 		);
+		const result = dbResponse.implicitResults[0];
 
-		console.log(dbResponse.rows);
+		console.log(result);
 
-		res.status(200).json(dbResponse.rows);
-
+		res.status(200).json(result);
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}
