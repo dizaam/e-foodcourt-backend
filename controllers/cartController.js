@@ -72,3 +72,33 @@ exports.update = async(req, res) => {
 		res.status(500).json({error: err.message});
 	}
 }
+
+exports.delete = async(req, res) => {
+	console.log(req.body);
+	const { customer_id, product_id } = req.body;
+
+	try {
+		const dbResponse = await database.execute(
+			`BEGIN
+				:flag := DELETE_CART_ITEM(:customer_id, :product_id);
+			END;`, {
+				customer_id: customer_id,
+				product_id: product_id,
+				flag: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
+			}
+		);
+
+		const result = dbResponse.outBinds.flag;
+		
+		console.log(result);
+
+		if (result) {
+			return res.status(200).json("Product deleted");
+		} else {
+			return res.status(400).json("Product not found");
+		}
+	} catch(err) {
+		return res.status(500).json({error: err.message})
+	}
+
+}

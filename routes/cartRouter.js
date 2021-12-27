@@ -7,4 +7,6 @@ router.get("/:id/detail", cartController.readDetail);
 
 router.put("/update", cartController.update);
 
+router.delete("/delete", cartController.delete);
+
 module.exports = router;
