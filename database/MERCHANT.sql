@@ -74,8 +74,8 @@ BEGIN
     RETURN 1;
     EXCEPTION
         WHEN NO_DATA_FOUND THEN
-        INSERT INTO MERCHANT (id, name, email, password, status, phone, website, is_login, created_at, updated_at)
-        VALUES(NULL, L_NAME, L_EMAIL, L_PASSWORD, 0, L_PHONE, L_WEBSITE, 0, SYSDATE, SYSDATE);
+        INSERT INTO MERCHANT (id, name, email, password, status, phone, website, is_login)
+        VALUES(NULL, L_NAME, L_EMAIL, L_PASSWORD, 0, L_PHONE, L_WEBSITE, 0);
         RETURN 0;
 END;
 /

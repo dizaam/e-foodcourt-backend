@@ -41,15 +41,15 @@ exports.readAll = async(req, res) => {
 }
 
 exports.register = async(req, res) => {
-	const {email, fullname, password, phone, gender} = req.body;
+	const {email, full_name, password, phone, gender} = req.body;
 
 	try {
 		const dbResponse = await database.execute(
 			`BEGIN
-				:flag := CREATE_CUSTOMER(:email, :fullname, :password, :phone, :gender);
+				:flag := CREATE_CUSTOMER(:email, :full_name, :password, :phone, :gender);
 			END;`,{
 				email: email,
-				fullname: fullname,
+				full_name: full_name,
 				password: password,
 				phone: phone, 
 				gender: gender,
@@ -197,6 +197,7 @@ exports.addToCart = async(req, res) => {
 
 	try {
 		const dbResponse = await database.execute(
+			// DBMS_SESSION.SLEEP (10);
 			`BEGIN
 				:flag := ADD_TO_CART(:customer_id, :product_id, :quantity, :note);
 			END;`,{
@@ -232,6 +233,7 @@ exports.checkout = async(req, res) => {
 
 	try {
 		const dbResponse = await database.execute(
+				// DBMS_SESSION.SLEEP (10);
 			`BEGIN
 				:flag := CHECKOUT(:customer_id, :table_no, :payment_method);
 			END;`,{
