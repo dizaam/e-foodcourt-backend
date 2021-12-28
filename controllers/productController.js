@@ -9,7 +9,23 @@ exports.readAll = async(req, res) => {
 			END;`
 		);
 
-		const result = dbResponse.implicitResults[0];
+		const result = await Promise.all(dbResponse.implicitResults[0].map(async(row) => {
+			const resp = await database.execute(
+				`BEGIN
+					READ_CATEGORY_BYPRODUCT(${row.ID});
+				END;`
+			)
+
+			return {
+				...row,
+				CATEGORY: resp.implicitResults[0].map(category => {
+					return {
+						CATEGORY_ID: category.CATEGORY_ID,
+						NAME: category.NAME
+					}
+				})
+			}
+		}));
 
 		console.log(result);
 
@@ -28,11 +44,29 @@ exports.readAllAvailable = async(req, res) => {
 			END;`
 		);
 
-		const result = dbResponse.implicitResults[0];
+		const result = await Promise.all(dbResponse.implicitResults[0].map(async(row) => {
+
+			const resp = await database.execute(
+				`BEGIN
+					READ_CATEGORY_BYPRODUCT(${row.ID});
+				END;`
+			)
+
+			return {
+				...row,
+				CATEGORY: resp.implicitResults[0].map(category => {
+					return {
+						CATEGORY_ID: category.CATEGORY_ID,
+						NAME: category.NAME
+					}
+				})
+			}
+		}));
 
 		console.log(result);
 
 		res.status(200).json(result);
+
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}
@@ -48,7 +82,25 @@ exports.readByCategory = async(req, res) => {
 				category_id: { dir: oracledb.BIND_IN, type: "ARRAY_OF_INTEGER", val: [...category_id] }
 			}
 		);
-		const result = dbResponse.implicitResults[0];
+
+		const result = await Promise.all(dbResponse.implicitResults[0].map(async(row) => {
+
+			const resp = await database.execute(
+				`BEGIN
+					READ_CATEGORY_BYPRODUCT(${row.ID});
+				END;`
+			)
+
+			return {
+				...row,
+				CATEGORY: resp.implicitResults[0].map(category => {
+					return {
+						CATEGORY_ID: category.CATEGORY_ID,
+						NAME: category.NAME
+					}
+				})
+			}
+		}));
 
 		console.log(result);
 
@@ -70,7 +122,22 @@ exports.readMerchant = async(req, res) => {
 			}
 		);
 
-		const result = dbResponse.implicitResults[0];
+		const result = await Promise.all(dbResponse.implicitResults[0].map(async(row) => {
+			const resp = await database.execute(
+				`BEGIN
+					READ_CATEGORY_BYPRODUCT(${row.ID});
+				END;`
+			)
+			return {
+				...row,
+				CATEGORY: resp.implicitResults[0].map(category => {
+					return {
+						CATEGORY_ID: category.CATEGORY_ID,
+						NAME: category.NAME
+					}
+				})
+			}
+		}));
 
 		console.log(result);
 
