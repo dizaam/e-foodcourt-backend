@@ -157,22 +157,25 @@ exports.create = async(req, res) => {
 }
 
 exports.update = async(req, res) => {
-	const { id, title, description, price, stock, image_url, category_id } = req.body;
+	const { product_id, merchant_id, title, description, price, stock, image_url, category_id } = req.body;
+	console.log(category_id);
 
 	try {
 		const dbResponse = await database.execute(
 			`BEGIN
-				:FLAG := UPDATE_PRODUCT(:ID, :TITLE, :DESCRIPTION, :PRICE, :STOCK, :IMAGE_URL);
+				:FLAG := UPDATE_PRODUCT(:product_id, :TITLE, :DESCRIPTION, :PRICE, :STOCK, :IMAGE_URL, :merchant_id);
 
-				CATEGORY_PKG.UPDATE_PRODUCT_CATEGORY(:ID, :CATEGORY_ID);
+				CATEGORY_PKG.UPDATE_PRODUCT_CATEGORY(:product_id, :CATEGORY_ID);
 			END;`, {
-				id: id,
+				product_id: product_id,
 				title: title,
 				description: description,
 				price: price,
 				stock: stock,
 				image_url: image_url,
-				CATEGORY_ID: { dir: oracledb.BIND_IN, type: oracledb.NUMBER, val: [...category_id]},
+				merchant_id: merchant_id,
+				// CATEGORY_ID: { dir: oracledb.BIND_IN, type: "CATEGORY_PKG.ARRAY_OF_INTEGER", val: [...category_id]},
+				category_id: category_id,
 				flag: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
 			}
 		);
