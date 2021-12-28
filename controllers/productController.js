@@ -63,18 +63,18 @@ exports.readMerchant = async(req, res) => {
 
 	try {
 		const dbResponse = await database.execute(
-			`SELECT *
-			FROM PRODUCT
-			WHERE MERCHANT_ID = :ID
-			`, {
+			`BEGIN
+				READ_PRODUCT_BYMERCHANT(:ID);
+			END;`, {
 				id: id
 			}
 		);
 
-		console.log(dbResponse.rows);
+		const result = dbResponse.implicitResults[0];
 
-		res.status(200).json(dbResponse.rows);
+		console.log(result);
 
+		res.status(200).json(result);
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}
@@ -84,34 +84,24 @@ exports.read = async(req, res) => {
 	const id = req.params.id;
 
 	try {
-		const getCategory = await database.execute(
-			`SELECT * 
-			FROM PRODUCT_CATEGORY
-			WHERE PRODUCT_ID = :ID
-			`, {
-				ID: id
-			}
-		)
-
-		const categories = getCategory.rows.map(category => {
-			return category.CATEGORY_ID;
-		})
-
 		const dbResponse = await database.execute(
-			`SELECT *
-			FROM PRODUCT
-			WHERE ID = :ID
-			`, {
+			`BEGIN
+				READ_A_PRODUCT(:id);
+				READ_CATEGORY_BYPRODUCT(:id);
+			END;`, {
 				id: id
 			}
 		);
 
-		const result = dbResponse.rows.map(product => {
-			return {
-				...product,
-				CATEGORY_ID: [...categories]
-			}
-		})
+		const result = {
+			...dbResponse.implicitResults[0][0],
+			CATEGORY: dbResponse.implicitResults[1].map(category => {
+				return {
+					CATEGORY_ID: category.CATEGORY_ID,
+					NAME: category.NAME
+				}
+			})
+		}
 
 		console.log(result);
 
@@ -196,15 +186,22 @@ exports.delete = async(req, res) => {
 
 	try {
 		const dbResponse = await database.execute(
-			`DELETE FROM PRODUCT
-			WHERE ID = :ID
-			`, {
-				id: id
+			`BEGIN
+				:flag := DELETE_A_PRODUCT(:ID);
+			END;`, {
+				id: id,
+				flag: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
 			}
 		);
-			
-		return res.status(200).json("Product deleted");
+		const result = dbResponse.outBinds.flag;
+		
+		console.log(result);
 
+		if (result) {
+			return res.status(200).json("Product deleted");
+		} else {
+			return res.status(400).json("Product not found");
+		}
 	} catch(err) {
 		return res.status(500).json({error: err.message})
 	}

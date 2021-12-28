@@ -178,7 +178,7 @@ CREATE SEQUENCE INVOICE_SEQ START WITH 1;
 --orders
 CREATE TABLE orders (
     id          INTEGER NOT NULL,
-    status      INTEGER NOT NULL,
+    status      INTEGER DEFAULT 0 NOT NULL,
     total_item  INTEGER NOT NULL,
     total_price INTEGER NOT NULL,
     customer_id INTEGER,

@@ -4,15 +4,14 @@ const database = require("../services/database");
 exports.readAll = async(req, res) => {
 	try {
 		const dbResponse = await database.execute(
-			`SELECT *
-			FROM PAYMENT
-			`
+			`BEGIN
+				READ_ALL_PAYMENT();
+			END;`
 		);
 
-		console.log(dbResponse.rows);
+		console.log(dbResponse.implicitResults[0]);
 
-		res.status(200).json(dbResponse.rows);
-
+		res.status(200).json(dbResponse.implicitResults[0]);
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}
@@ -22,16 +21,14 @@ exports.readAll = async(req, res) => {
 exports.readAvailable = async(req, res) => {
 	try {
 		const dbResponse = await database.execute(
-			`SELECT *
-			FROM PAYMENT
-			WHERE STATUS = 1
-			`
+			`BEGIN
+				READ_AVAILABLE_PAYMENT();
+			END;`
 		);
 
-		console.log(dbResponse.rows);
+		console.log(dbResponse.implicitResults[0]);
 
-		res.status(200).json(dbResponse.rows);
-
+		res.status(200).json(dbResponse.implicitResults[0]);
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}
@@ -74,15 +71,23 @@ exports.delete = async(req, res) => {
 
 	try {
 		const dbResponse = await database.execute(
-			`DELETE FROM PAYMENT 
-			WHERE ID = :ID
-			`, {
-				id: id
+			`BEGIN
+				:flag := DELETE_A_PAYMENT(:ID);
+			END;`, {
+				id: id,
+				flag: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
 			}
 		);
-			
-		return res.status(200).json("Payment method deleted");
 
+		const result = dbResponse.outBinds.flag;
+		
+		console.log(result);
+
+		if (result) {
+			return res.status(200).json("Payment deleted");
+		} else {
+			return res.status(400).json("Payment not found");
+		}
 	} catch(err) {
 		return res.status(500).json({error: err.message})
 	}

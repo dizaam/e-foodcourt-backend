@@ -116,7 +116,7 @@ exports.logout = async(req, res) => {
 	const customer_id = req.params.id;
 
 	try {
-		const dbResponse = await database.execute(
+		await database.execute(
 			`BEGIN
 				LOGOUT_CUSTOMER(:customer_id);
 			END;`, {
@@ -245,6 +245,8 @@ exports.checkout = async(req, res) => {
 		);
 
 		const status = dbResponse.outBinds;
+
+		console.log(status.flag);
 
 		if (status.flag === 1) {
 			console.log("You can only orders at least 1 item");

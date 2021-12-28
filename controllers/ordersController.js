@@ -7,17 +7,16 @@ exports.read = async(req, res) => {
 
 	try {
 		const dbResponse = await database.execute(
-			`SELECT * 
-			FROM ORDERS_ITEM
-			WHERE ORDERS_ID = :ID
-			`, {
+			`BEGIN
+				READ_ORDERS_DETAIL(:ID);
+			END;`, {
 				id: id
 			}
 		);
 
-		console.log(dbResponse.rows);
+		console.log(dbResponse.implicitResults[0]);
 
-		res.status(200).json(dbResponse.rows);
+		res.status(200).json(dbResponse.implicitResults[0]);
 
 	} catch(err) {
 		res.status(500).json({message: err.message});
@@ -29,17 +28,16 @@ exports.readCustomer = async(req, res) => {
 
 	try {
 		const dbResponse = await database.execute(
-			`SELECT *
-			FROM ORDERS
-			WHERE CUSTOMER_ID = :ID
-			`, {
+			`BEGIN
+				READ_ORDERS_BYCUSTOMER(:ID);
+			END;`, {
 				id: id
 			}
 		);
 
-		console.log(dbResponse.rows);
+		console.log(dbResponse.implicitResults[0]);
 
-		res.status(200).json(dbResponse.rows);
+		res.status(200).json(dbResponse.implicitResults[0]);
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}
@@ -50,18 +48,16 @@ exports.readMerchant = async(req, res) => {
 
 	try {
 		const dbResponse = await database.execute(
-			`SELECT *
-			FROM ORDERS
-			WHERE MERCHANT_ID = :ID
-			`, {
+			`BEGIN
+				READ_ORDERS_BYMERCHANT(:ID);
+			END;`, {
 				id: id
 			}
 		);
 
-		console.log(dbResponse.rows);
+		console.log(dbResponse.implicitResults[0]);
 
-		res.status(200).json(dbResponse.rows);
-
+		res.status(200).json(dbResponse.implicitResults[0]);
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}

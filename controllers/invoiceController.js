@@ -6,15 +6,14 @@ exports.readAll = async(req, res) => {
 
 	try {
 		const dbResponse = await database.execute(
-			`SELECT * 
-			FROM INVOICE
-			`
+			`BEGIN
+				READ_ALL_INVOICE();
+			END;`
 		);
 
-		console.log(dbResponse.rows);
+		console.log(dbResponse.implicitResults[0]);
 
-		res.status(200).json(dbResponse.rows);
-
+		res.status(200).json(dbResponse.implicitResults[0]);
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}
@@ -26,20 +25,17 @@ exports.readCustomer = async(req, res) => {
 
 	try {
 		const dbResponse = await database.execute(
-			`SELECT *
-			FROM INVOICE
-			WHERE CUSTOMER_ID = :ID
-			`, {
+			`BEGIN
+				READ_INVOICE_BYCUSTOMER(:ID);
+			END;`, {
 				id: id
 			}
 		);
 
-		console.log(dbResponse.rows);
+		console.log(dbResponse.implicitResults[0]);
 
-		res.status(200).json(dbResponse.rows);
-
+		res.status(200).json(dbResponse.implicitResults[0]);
 	} catch(err) {
 		res.status(500).json({message: err.message});
 	}
-
 }
