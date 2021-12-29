@@ -13,6 +13,7 @@ const categoryRouter = require("../routes/categoryRouter");
 const ordersRouter = require("../routes/ordersRouter");
 const invoiceRouter = require("../routes/invoiceRouter");
 const cartRouter = require("../routes/cartRouter");
+const reviewRouter = require("../routes/reviewRouter");
 
 exports.initServer = async() => {
 	const app = express();
@@ -64,6 +65,7 @@ exports.initServer = async() => {
 	app.use("/orders", ordersRouter);
 	app.use("/invoice", invoiceRouter);
 	app.use("/cart", cartRouter);
+	app.use("/review", reviewRouter);
 	
 	app.listen(6969, () => {
 		console.log("Listening on port 6969");
